@@ -1,0 +1,5 @@
+import { spawn } from 'node:child_process';
+const p=spawn(process.execPath,['apps/api/server.mjs'],{env:{...process.env,PORT:'8899',OWNER_TOKEN:'smoke-token',DATA_DIR:'/tmp/finpilot-smoke-data'},stdio:['ignore','pipe','pipe']});
+await new Promise(r=>setTimeout(r,500));
+async function req(path,opts={}){const r=await fetch('http://127.0.0.1:8899'+path,{...opts,headers:{'content-type':'application/json','x-owner-id':'shuyeb328','authorization':'Bearer smoke-token',...(opts.headers||{})}});return [r.status,await r.json()];}
+try{const [h]=await req('/health',{headers:{}});if(h!==200)throw new Error('health failed');const [d]=await req('/api/decision',{method:'POST',body:JSON.stringify({upsidePct:12,downsidePct:-8,baseProbability:.6,simulations:1000})});if(d!==200)throw new Error('decision failed');const [f]=await req('/api/finance/overview',{method:'POST',body:JSON.stringify({assets:[{type:'cash',value:1000}],income:[{amount:2000}],expenses:[{amount:1000}]})});if(f!==200)throw new Error('finance failed');console.log('SMOKE_OK');}finally{p.kill('SIGTERM');}

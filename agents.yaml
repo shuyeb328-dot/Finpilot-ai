@@ -1,0 +1,24 @@
+master_finance_ai:
+  role: orchestrator
+  agents:
+    - money_manager
+    - wealth_manager
+    - portfolio_analyst
+    - debt_manager
+    - tax_assistant
+    - goal_planner
+    - risk_manager
+    - research_agent
+    - fraud_guardian
+    - financial_news_agent
+
+money_manager: cashflow, budgeting, expenses, subscriptions
+wealth_manager: net_worth, allocation, long_term_planning
+portfolio_analyst: holdings, diversification, valuation, performance
+debt_manager: loans, EMI, payoff and refinance scenarios
+tax_assistant: tax knowledge, estimates, document/checklist support
+goal_planner: savings targets, projections, scenario planning
+risk_manager: volatility, drawdown, liquidity, concentration, scenario risk
+research_agent: current web research, filings, primary sources
+fraud_guardian: anomalies, duplicate charges, suspicious patterns
+financial_news_agent: current events, central banks, macro and company news

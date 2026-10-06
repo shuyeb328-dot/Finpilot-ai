@@ -1,0 +1,21 @@
+executive_divisions:
+  - ceo_judge
+  - cfo_finance
+  - investment_valuation
+  - risk_security
+  - markets_macro
+  - business_strategy
+  - real_assets
+  - governance_tax_compliance
+specialist_agents:
+  data: [data_quality, entity_resolution, freshness]
+  evidence: [source_verifier, claim_extractor, contradiction_detector, provenance]
+  investment: [bull, bear, value, quant, fundamental, technical, portfolio]
+  macro: [rates, inflation, fx, commodities, liquidity, geopolitical]
+  risk: [market, credit, liquidity, leverage, concentration, counterparty, cyber, operational]
+  assets: [crypto, real_estate, private_business, venture, bonds, equities]
+  strategy: [competitive, game_theory, negotiation, pricing, moat, disruption, scenario]
+  deals: [deal_sourcing, diligence, valuation, financing, synergy, red_team, integration]
+  governance: [legal_review, tax, accounting, regulatory, fraud, audit]
+  simulation: [monte_carlo, stress_test, scenario_tree, digital_twin]
+  decision: [probability, capital_allocation, portfolio_optimizer, ceo_judge]

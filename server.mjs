@@ -1,0 +1,80 @@
+import http from 'node:http';
+import crypto from 'node:crypto';
+import {URL} from 'node:url';
+import {readFile} from 'node:fs/promises';
+import {runDecision} from '../../services/decision-kernel/index.mjs';
+import {verifyDeal} from '../../services/verification/index.mjs';
+import {searchIntelligence} from '../../services/intelligence/index.mjs';
+import {list} from '../../services/persistence/store.mjs';
+import {providerStatus,fetchMarketIntelligence} from '../../services/providers/index.mjs';
+import {recordEvent,scanWatchtower} from '../../services/watchtower/index.mjs';
+import {portfolioRisk} from '../../services/portfolio/index.mjs';
+import {rankCapital} from '../../services/capital/index.mjs';
+import {cryptoAssessment} from '../../services/crypto/index.mjs';
+import {realEstateAssessment} from '../../services/realestate/index.mjs';
+import {detectAlerts} from '../../services/watchtower/rules.mjs';
+import {agentCycle,adapt,learningStatus} from '../../services/autonomy/index.mjs';
+import {createPaperAccount,paperOrder,paperStatus,paperTrades} from '../../services/paper/index.mjs';
+import {executionPolicy} from '../../services/execution/index.mjs';
+import {liveQuote} from '../../services/market/index.mjs';
+import {dueTimeframes} from '../../services/autonomy/timeframes.mjs';
+import {securityGuard,securityFailure,securitySuccess,maxBodyBytes,runSecurityGuardian,securityStatus,securityEvents} from '../../services/security/guardian.mjs';
+import {securityOrg,runSecurityDivision,securityIncident,securityIncidents,securityFindings} from '../../services/security/security-division.mjs';
+import {financeOverview,budgetPlan,debtPlan,cashflowForecast,taxReserve,goalPlan,financialHealth} from '../../services/finance/index.mjs';
+import {hubSnapshot,categorizeTransactions,connectorCatalog} from '../../services/finance-hub/index.mjs';
+const PORT=Number(process.env.PORT||8787),OWNER_ID=process.env.OWNER_ID||'shuyeb328',OWNER_TOKEN=process.env.OWNER_TOKEN||'',OWNER_RECOVERY_CODE=process.env.OWNER_RECOVERY_CODE||'';
+let activeOwnerToken=OWNER_TOKEN;
+function ownerToken(){return activeOwnerToken;}
+function rotateToken(code){if(!OWNER_RECOVERY_CODE||code!==OWNER_RECOVERY_CODE)throw Object.assign(new Error('RECOVERY_FAILED'),{status:403}); activeOwnerToken='fp_'+crypto.randomUUID().replaceAll('-',''); return activeOwnerToken;}
+const dashboard=await readFile(new URL('../dashboard/index.html',import.meta.url),'utf8');
+function json(res,c,b){res.writeHead(c,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','x-frame-options':'DENY','referrer-policy':'no-referrer','permissions-policy':'camera=(),microphone=(),geolocation=()','content-security-policy':"default-src 'self'; object-src 'none'; frame-ancestors 'none'"});res.end(JSON.stringify(b,null,2));}
+async function body(req){let s='';let n=0;for await(const c of req){n+=Buffer.byteLength(c);if(n>maxBodyBytes())throw Object.assign(new Error('REQUEST_TOO_LARGE'),{status:413});s+=c}if(!s)return {};try{return JSON.parse(s)}catch{throw Object.assign(new Error('INVALID_JSON'),{status:400})}}
+function auth(req){if(req.headers['x-owner-id']!==OWNER_ID)return false;if(ownerToken()&&req.headers.authorization!==`Bearer ${ownerToken()}`)return false;return true;}
+const server=http.createServer(async(req,res)=>{try{const gate=securityGuard(req);if(!gate.allowed)return json(res,gate.status,{error:gate.reason});const u=new URL(req.url,`http://${req.headers.host||'localhost'}`);if(req.method==='GET'&&u.pathname==='/'){res.writeHead(200,{'content-type':'text/html'});return res.end(dashboard)}if(req.method==='GET'&&u.pathname==='/health')return json(res,200,{ok:true,version:'1220.0',providers:providerStatus(),llmConfigured:Boolean(process.env.LLM_API_URL&&process.env.LLM_API_KEY)});
+if(req.method==='POST'&&u.pathname==='/api/owner/recover'){const b=await body(req); if(b.ownerId!==OWNER_ID)return json(res,403,{error:'RECOVERY_FAILED'}); try{return json(res,200,{ok:true,ownerId:OWNER_ID,token:rotateToken(b.recoveryCode),warning:'Store this token securely. It will not be shown again.'});}catch(e){return json(res,403,{error:'RECOVERY_FAILED'});}}
+if(req.method==='GET'&&u.pathname==='/api/owner/status')return json(res,200,{ownerId:OWNER_ID,configured:Boolean(ownerToken()),recoveryConfigured:Boolean(OWNER_RECOVERY_CODE),security:securityStatus()});
+if(req.method==='GET'&&u.pathname==='/api/security/status')return json(res,200,securityStatus());
+if(req.method==='GET'&&u.pathname==='/api/security/org')return json(res,200,securityOrg());
+if(req.method==='GET'&&u.pathname==='/api/security/incidents')return json(res,200,{incidents:securityIncidents(Number(u.searchParams.get('limit')||50))});
+if(req.method==='GET'&&u.pathname==='/api/security/findings')return json(res,200,{findings:securityFindings(Number(u.searchParams.get('limit')||100))});
+if(req.method==='POST'&&u.pathname==='/api/security/incident'){if(!auth(req))return json(res,401,{error:'OWNER_AUTH_REQUIRED'});return json(res,201,securityIncident(await body(req)));}
+if(req.method==='POST'&&u.pathname==='/api/finance/overview')return json(res,200,financeOverview(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance/budget')return json(res,200,budgetPlan(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance/debt-plan')return json(res,200,debtPlan(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance/cashflow')return json(res,200,cashflowForecast(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance/tax-reserve')return json(res,200,taxReserve(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance/goal')return json(res,200,goalPlan(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance/health')return json(res,200,financialHealth(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance-hub/snapshot')return json(res,200,hubSnapshot(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/finance-hub/categories')return json(res,200,{categories:categorizeTransactions((await body(req)).transactions||[])});
+if(req.method==='GET'&&u.pathname==='/api/finance-hub/connectors')return json(res,200,{connectors:connectorCatalog()});
+if(req.method==='GET'&&u.pathname==='/api/security/events')return json(res,200,{events:securityEvents(Number(u.searchParams.get('limit')||100))});
+if(req.method==='POST'&&u.pathname==='/api/security/scan'){const guardian=await runSecurityGuardian();return json(res,200,{guardian,division:runSecurityDivision({guardianState:guardian.state})});}if(!auth(req)){securityFailure(gate.key,'OWNER_AUTH_REQUIRED');return json(res,401,{error:'OWNER_AUTH_REQUIRED'});} securitySuccess(gate.key);
+if(req.method==='POST'&&u.pathname==='/api/decision')return json(res,200,await runDecision(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/deal/verify')return json(res,200,await verifyDeal(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/intelligence/search')return json(res,200,await searchIntelligence(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/market/intelligence')return json(res,200,await fetchMarketIntelligence(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/watchtower/event')return json(res,200,await recordEvent(await body(req)));
+if(req.method==='GET'&&u.pathname==='/api/watchtower')return json(res,200,await scanWatchtower({limit:u.searchParams.get('limit')}));
+if(req.method==='GET'&&u.pathname==='/api/decisions')return json(res,200,await list('decisions',Number(u.searchParams.get('limit')||20)));
+if(req.method==='GET'&&u.pathname==='/api/audit')return json(res,200,await list('audit',Number(u.searchParams.get('limit')||50)));
+if(req.method==='POST'&&u.pathname==='/api/portfolio/risk')return json(res,200,portfolioRisk((await body(req)).assets||[]));
+if(req.method==='POST'&&u.pathname==='/api/capital/rank')return json(res,200,{ranked:rankCapital((await body(req)).options||[])});
+if(req.method==='POST'&&u.pathname==='/api/crypto/assess')return json(res,200,cryptoAssessment(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/realestate/assess')return json(res,200,realEstateAssessment(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/watchtower/scan-events')return json(res,200,{alerts:detectAlerts((await body(req)).events||[])});
+if(req.method==='POST'&&u.pathname==='/api/autonomy/cycle')return json(res,200,await agentCycle(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/autonomy/adapt')return json(res,200,await adapt(await body(req)));
+if(req.method==='GET'&&u.pathname==='/api/autonomy/learning')return json(res,200,await learningStatus());
+if(req.method==='GET'&&u.pathname==='/api/autonomy/timeframes')return json(res,200,{timeframes:dueTimeframes(0)});
+if(req.method==='GET'&&u.pathname==='/api/market/quote')return json(res,200,await liveQuote(u.searchParams.get('symbol')));
+if(req.method==='POST'&&u.pathname==='/api/paper/account')return json(res,200,await createPaperAccount(await body(req)));
+if(req.method==='POST'&&u.pathname==='/api/paper/order')return json(res,200,await paperOrder(await body(req)));
+if(req.method==='GET'&&u.pathname==='/api/paper/account')return json(res,200,await paperStatus(u.searchParams.get('id')));
+if(req.method==='GET'&&u.pathname==='/api/paper/trades')return json(res,200,await paperTrades(Number(u.searchParams.get('limit')||100)));
+if(req.method==='POST'&&u.pathname==='/api/execution/policy')return json(res,200,executionPolicy(await body(req)));
+return json(res,404,{error:'NOT_FOUND'});}catch(e){return json(res,e.status||500,{error:e.status===400?'BAD_REQUEST':'SERVER_ERROR',message:e.message});}});
+const SECURITY_SCAN_MS=Number(process.env.SECURITY_SCAN_INTERVAL_MS||300000);
+runSecurityGuardian().then(g=>runSecurityDivision({guardianState:g.state})).catch(()=>{});
+setInterval(()=>runSecurityGuardian().then(g=>runSecurityDivision({guardianState:g.state})).catch(()=>{}),SECURITY_SCAN_MS).unref();
+server.listen(PORT,()=>console.log(`FinPilot AI 1210.0 Security & Trust Division running on http://localhost:${PORT}`));

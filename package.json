@@ -1,0 +1,17 @@
+{
+  "name": "finpilot-ai",
+  "version": "1220.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node apps/api/server.mjs",
+    "dev": "node --watch apps/api/server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "smoke": "node tests/smoke.mjs",
+    "verify": "node tests/verify.mjs",
+    "agent-cycle": "node tests/agent-cycle.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

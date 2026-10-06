@@ -1,0 +1,50 @@
+version: 1
+agents:
+  - id: master_judge
+    role: final decision synthesis
+  - id: bull
+    role: upside thesis
+  - id: bear
+    role: downside thesis
+  - id: value
+    role: valuation and margin of safety
+  - id: quant
+    role: statistics, factor and scenario analysis
+  - id: macro
+    role: rates, inflation, growth, liquidity and geopolitical macro context
+  - id: fundamental
+    role: business and financial-statement analysis
+  - id: risk
+    role: risk, drawdown, liquidity and tail-risk analysis
+  - id: compliance
+    role: legal, regulatory and policy gate
+  - id: deal
+    role: M&A, financing, partnership and transaction structure
+  - id: crypto
+    role: digital-asset and on-chain risk/return analysis
+  - id: real_estate
+    role: property underwriting and real-estate market analysis
+  - id: strategy
+    role: competitive strategy and game-theory analysis
+  - id: historical_strategy
+    role: historical case-study lessons and strategic analogies
+  - id: red_team
+    role: adversarial challenge and failure analysis
+  - id: evidence
+    role: source verification and contradiction detection
+
+round_table:
+  rounds:
+    - independent_analysis
+    - evidence_check
+    - challenge
+    - rebuttal
+    - scenario_stress_test
+    - final_vote
+    - judge_synthesis
+  rules:
+    - agents must cite evidence for time-sensitive claims
+    - agents may change their view after credible contrary evidence
+    - no unsupported certainty
+    - no approval when critical evidence is missing or contradicted
+    - legal/compliance constraints override profit maximization

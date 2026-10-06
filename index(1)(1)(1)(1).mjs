@@ -1,0 +1,2 @@
+export function rankCapital(options=[]) {
+  return options.map((o,i)=>{const ret=Number(o.expectedReturnPct||0)/100, risk=Math.max(.01,Number(o.risk||.5)), prob=Math.max(0,Math.min(1,Number(o.probability||.5))), liquidity=Math.max(.05,Math.min(1,Number(o.liquidity||.5))); const score=(ret*prob)/(risk)*(0.7+0.3*liquidity); return {...o,index:Number(score.toFixed(5)),rank:0};}).sort((a,b)=>b.index-a.index).map((x,i)=>({...x,rank:i+1}));}

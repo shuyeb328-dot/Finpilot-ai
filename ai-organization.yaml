@@ -1,0 +1,49 @@
+version: 1
+owner: shuyeb328
+major_divisions:
+  - id: ceo
+    name: CEO Final Decision AI
+    role: final_reconciliation
+  - id: cfo
+    name: CFO Financial Intelligence AI
+    role: financial_control
+  - id: valuation
+    name: Investment & Valuation AI
+    role: valuation
+  - id: risk
+    name: Risk & Security AI
+    role: risk_control
+  - id: macro
+    name: Markets & Macro AI
+    role: market_regime
+  - id: strategy
+    name: Business & Strategy AI
+    role: competitive_strategy
+  - id: assets
+    name: Assets & Real-World AI
+    role: real_assets
+  - id: governance
+    name: Compliance Tax & Governance AI
+    role: compliance
+control_agents:
+  - evidence_controller
+  - data_controller
+  - risk_controller
+  - valuation_controller
+  - probability_controller
+  - decision_controller
+  - audit_controller
+decision_gates:
+  - DATA
+  - EVIDENCE
+  - VALUATION
+  - RISK
+  - PROBABILITY
+  - CEO_APPROVAL
+outcomes:
+  - PROMOTE
+  - PROCEED_WITH_LIMITS
+  - WATCH
+  - REJECT
+  - INSUFFICIENT_EVIDENCE
+  - HUMAN_APPROVAL_REQUIRED

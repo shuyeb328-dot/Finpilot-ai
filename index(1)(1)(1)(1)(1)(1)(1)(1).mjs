@@ -1,0 +1,1 @@
+export function governanceGate({riskScore=0,evidenceStatus='VERIFIED_MULTI_SOURCE',amount=0,approval='WATCH'}={}) { const human=Number(riskScore)>=.75||Number(amount)>=10000000||['CONTRADICTED','UNVERIFIED_RUMOR'].includes(evidenceStatus); return {humanApprovalRequired:human,reason:human?'HIGH_IMPACT_OR_EVIDENCE_RISK':'WITHIN_AUTOMATED_POLICY',approval}; }

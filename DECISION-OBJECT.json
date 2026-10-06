@@ -1,0 +1,15 @@
+{
+  "decision_id": "example",
+  "recommendation": "HUMAN_APPROVAL_REQUIRED",
+  "probability": {"positive": 0.0, "neutral": 0.0, "negative": 0.0},
+  "economics": {"expected_return": null, "expected_downside": null, "risk_reward": null},
+  "valuation": {"low": null, "base": null, "high": null, "method": null},
+  "risk": {"market": null, "liquidity": null, "credit": null, "concentration": null, "counterparty": null, "regulatory": null},
+  "evidence": [],
+  "dissent": [],
+  "assumptions": [],
+  "missing_information": [],
+  "stress_tests": [],
+  "approval": {"tier": "CRITICAL", "human_required": true},
+  "audit": {"model_version": null, "created_at": null}
+}
