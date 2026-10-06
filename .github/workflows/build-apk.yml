@@ -1,0 +1,85 @@
+name: Build FinPilot AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find and extract FinPilot package
+        shell: bash
+        run: |
+          set -e
+
+          ZIP_FILE="$(find . -maxdepth 1 -type f -name 'FinPilot-AI-Complete-v1241-APK-ready-logo.zip' -print -quit)"
+
+          if [ -z "$ZIP_FILE" ]; then
+            echo "FinPilot v1241 ZIP not found"
+            ls -la
+            exit 1
+          fi
+
+          mkdir -p build-source
+          unzip -q "$ZIP_FILE" -d build-source
+
+          echo "Extracted project:"
+          find build-source -maxdepth 3 -type f | head -100
+
+      - name: Locate Android project
+        shell: bash
+        run: |
+          set -e
+
+          ANDROID_DIR="$(find build-source -type f -name 'settings.gradle' -printf '%h\n' | head -1)"
+
+          if [ -z "$ANDROID_DIR" ]; then
+            echo "Android project not found"
+            exit 1
+          fi
+
+          echo "ANDROID_DIR=$ANDROID_DIR" >> "$GITHUB_ENV"
+          echo "Found Android project at: $ANDROID_DIR"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Build APK
+        run: |
+          set -e
+          cd "$ANDROID_DIR"
+          gradle :app:assembleDebug --no-daemon
+
+      - name: Verify APK
+        run: |
+          set -e
+          APK="$ANDROID_DIR/app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -f "$APK" ]; then
+            echo "APK was not created"
+            exit 1
+          fi
+
+          echo "APK created successfully:"
+          ls -lh "$APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: finpilot-ai-v1241-debug-apk
+          path: ${{ env.ANDROID_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
