@@ -1,0 +1,59 @@
+name: Prepare FinPilot Server
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract FinPilot package
+        run: |
+          set -e
+
+          ZIP="FinPilot-AI-Complete-v1241-APK-ready-logo.zip"
+
+          if [ ! -f "$ZIP" ]; then
+            echo "FinPilot ZIP not found"
+            exit 1
+          fi
+
+          rm -rf /tmp/finpilot
+          mkdir -p /tmp/finpilot
+
+          unzip -q "$ZIP" -d /tmp/finpilot
+
+          SOURCE="/tmp/finpilot/finpilot-secure"
+
+          if [ ! -f "$SOURCE/apps/api/server.mjs" ]; then
+            echo "FinPilot API was not found"
+            exit 1
+          fi
+
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            "$SOURCE/" ./
+
+      - name: Commit extracted FinPilot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git status
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+
+          git commit -m "Prepare FinPilot backend for deployment"
+          git push
